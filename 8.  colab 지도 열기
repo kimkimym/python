@@ -1,0 +1,39 @@
+import folium
+
+# 지도의 중심 좌표 인천 미추홀구 중심으로 설정
+center_lat = 37.457075640000745
+center_lng = 126.66497192999852
+
+# Folium 지도 객체 생성
+m = folium.Map(location=[center_lat, center_lng], zoom_start=13)
+
+colors = {
+    '내과': 'red',
+    '안과': 'blue',
+    '소아과': 'green',
+    '외과': 'orange',
+    '이비안후과': 'purple',
+    '재활의학과': 'yellow',
+    '정신과': 'pink',
+    '치과': 'brown',
+    '한의원': 'gray',
+    '요양병원': 'black'
+}
+
+# 데이터프레임을 순회하며 마커 추가
+for index, row in df.iterrows():
+    name = row['med_fc_nm']
+    lat = row['lat']
+    lng = row['lot']
+    addr = row['road_nm_addr']
+    category = row['기관']
+    
+    popup_text = f'<strong style="font-size: 14px;">{name}</strong><br><span style="font-size: 12px;">주소: {addr}</span>'
+    popup = folium.Popup(popup_text, max_width=300)
+    
+    marker_color = colors.get(category, other_color)
+    
+    folium.Marker([lat, lng], popup=popup, icon=folium.Icon(color=marker_color)).add_to(m)
+
+# colab 지도
+m
