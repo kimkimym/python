@@ -1,0 +1,3 @@
+# 데이터프레임의 lat, lot 열을 실수형(float)으로 변환
+df['lat'] = df['lat'].astype(float)
+df['lot'] = df['lot'].astype(float)
