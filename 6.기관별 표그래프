@@ -1,0 +1,31 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib import font_manager, rc
+
+# 기관 종류 데이터를 기반으로 데이터 추출
+df['기관'] = df['med_fc_nm'].apply(lambda x: [item for item in ['내과', '안과', '소아과', '외과', '이비안후과',
+                                                           '재활의학과', '정신과', '치과', '한의원', '요양병원'] if item in x])
+
+
+df = df[df['기관'].apply(lambda x: len(x) > 0)]
+# 기관을 하나의 문자열로 변환ㄴ
+df['기관'] = df['기관'].apply(lambda x: ', '.join(x))
+
+# 기관별로 개수를 계산하여 새로운 데이터프레임 생성
+df_count = df.groupby('기관').size().reset_index(name='개수')
+
+# 표 그래프 생성
+plt.figure(figsize=(12, 6))
+bar_colors = ['lightblue'] * len(df_count['기관'])  # 모든 막대를 연한 파란색으로 설정
+plt.bar(df_count['기관'], df_count['개수'], color=bar_colors)
+plt.xlabel('기관', fontweight='bold', fontsize=12)
+plt.ylabel('개수', fontweight='bold', fontsize=12, rotation='horizontal')
+plt.title('기관별 병원', fontweight='bold', fontsize=12)
+
+# 개수 텍스트 추가
+for i, v in enumerate(df_count['개수']):
+    plt.text(i, v + 0.5, str(v), ha='center', va='bottom')
+
+plt.xticks(rotation=0)
+plt.tight_layout()
+plt.show()
