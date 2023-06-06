@@ -1,0 +1,24 @@
+import requests
+import xmltodict
+import json
+
+url = 'http://apis.data.go.kr/3510500/medical_institution/getList'
+params ={'serviceKey' : 'cvbnI2aSGme655pYVb4GPhygiwQeyjzKOIa9YvHz7ZoExFau0vVblvvVxmP8uYigLtVb0A6owSdKpACZ7XYpVg==', 'pageNo' : '1', 'numOfRows' : '500', 'type' : 'XML' }
+
+response = requests.get(url, params=params)
+xml_data = response.content
+
+# XML to Dictionary
+data_dict = xmltodict.parse(xml_data)
+
+# Dictionary to JSON
+json_data = json.dumps(data_dict)
+
+# Assign JSON data to 'json_file' variable
+json_file = json.loads(json_data)
+
+# Now you can use 'json_file' variable to access the JSON data
+from pandas import json_normalize
+
+df = json_normalize(json_file['response']['body']['items']['item'])
+df
