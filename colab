@@ -1,0 +1,11 @@
+#인천 미추홀구 병원
+# Python3 샘플 코드 #
+
+
+import requests
+
+url = 'http://apis.data.go.kr/3510500/medical_institution/getList'
+params ={'serviceKey' : 'cvbnI2aSGme655pYVb4GPhygiwQeyjzKOIa9YvHz7ZoExFau0vVblvvVxmP8uYigLtVb0A6owSdKpACZ7XYpVg==', 'pageNo' : '1', 'numOfRows' : '500', 'type' : 'XML' }
+
+response = requests.get(url, params=params)
+print(response.content)
