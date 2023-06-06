@@ -1,0 +1,29 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 주소 데이터를 기반으로 동(동네) 추출
+df['동'] = df['road_nm_addr'].apply(lambda x: [item for item in ['관교동', '도화동', '문학동', '숭의동', '용현동', '주안동', '학익동'] if item in x])
+
+# 동(동네)별 데이터 필터링
+df = df[df['동'].apply(lambda x: len(x) > 0)]
+
+# 동(동네)를 하나의 문자열로 변환
+df['동'] = df['동'].apply(lambda x: ', '.join(x))
+
+# 동(동네)별로 개수를 계산하여 새로운 데이터프레임 생성
+df_count = df.groupby('동').size().reset_index(name='개수')
+
+# 표 그래프 생성
+plt.figure(figsize=(12, 6))
+bar_colors = ['lightblue'] * len(df_count['동'])
+plt.bar(df_count['동'], df_count['개수'], color=bar_colors)
+plt.xlabel('동(동네)' ,fontweight='bold', fontsize=12)
+plt.ylabel('개수', fontweight='bold', fontsize=12, rotation='horizontal')
+plt.title('동(동네)별 병원', fontweight='bold', fontsize=12)
+
+for i, v in enumerate(df_count['개수']):
+    plt.text(i, v + 0.5, str(v), ha='center', va='bottom')
+
+plt.xticks(rotation=0)
+plt.tight_layout() 
+plt.show()
