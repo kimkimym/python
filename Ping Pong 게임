@@ -1,0 +1,138 @@
+import pygame
+from pygame.locals import *
+import sys
+
+# 화면 크기 설정
+WIDTH = 400
+HEIGHT = 480
+
+# 색상 설정
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+
+# 패들 초기 위치 설정
+PADDLE_WIDTH = 80
+PADDLE_HEIGHT = 10
+paddle_x = WIDTH // 2 - PADDLE_WIDTH // 2
+paddle_y = HEIGHT - PADDLE_HEIGHT - 10
+
+# 공 초기 위치 설정
+BALL_RADIUS = 5
+ball_x = WIDTH // 2
+ball_y = HEIGHT // 2
+ball_dx = 4
+ball_dy = 4
+
+# 게임 초기화
+pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('1인 탁구－김용민')
+
+clock = pygame.time.Clock()
+
+font = pygame.font.Font(None, 36)
+
+playing = False  # 게임 진행 여부
+score = 0  # 점수 초기화
+chances = 3  # 게임 기회
+
+start_ticks = 0  # 게임 시작 시간 저장 변수
+end_ticks = 0  # 게임 종료 시간 저장 변수
+idle_ticks = 0  # 아무 키도 입력하지 않은 시간 저장 변수
+
+def reset_game():
+    global playing, score, chances, paddle_x, ball_x, ball_y, ball_dx, ball_dy, start_ticks, end_ticks, idle_ticks
+    playing = False
+    score = 0
+    chances = 3
+    paddle_x = WIDTH // 2 - PADDLE_WIDTH // 2
+    ball_x = WIDTH // 2
+    ball_y = HEIGHT // 2
+    start_ticks = pygame.time.get_ticks()  # 리셋 시간 저장
+    end_ticks = 0  # 종료 시간 초기화
+    idle_ticks = 0  # 아무 키 입력 없는 시간 초기화
+
+# 게임 루프
+while True:
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == KEYDOWN:
+            if event.key == K_SPACE:
+                if not playing and chances > 0:
+                    playing = True
+                    ball_x = WIDTH // 2
+                    ball_y = HEIGHT // 2
+                    chances -= 1
+                    ball_dx = 4 + (3 - chances)  # 공 속도 증가
+            elif event.key == K_RETURN:
+                if not playing and chances <= 0:
+                    reset_game()
+            else:
+                if not playing and end_ticks > 0:
+                    idle_ticks = pygame.time.get_ticks() - end_ticks
+
+    if playing:  # 게임이 진행 중일 때
+        keys = pygame.key.get_pressed()
+        if keys[K_LEFT] and paddle_x > 0:
+            paddle_x -= 5
+        if keys[K_RIGHT] and paddle_x < WIDTH - PADDLE_WIDTH:
+            paddle_x += 5
+
+        # 공 이동
+        ball_x += ball_dx
+        ball_y += ball_dy
+
+        # 벽과 충돌 검사
+        if ball_x <= BALL_RADIUS or ball_x >= WIDTH - BALL_RADIUS:
+            ball_dx *= -1
+        if ball_y <= BALL_RADIUS:
+            ball_dy *= -1
+
+        # 패들과 충돌 검사
+        if paddle_x <= ball_x <= paddle_x + PADDLE_WIDTH and ball_y >= paddle_y - BALL_RADIUS:
+            ball_dy *= -1
+            score += 100  # 공이 패들을 터치할 때마다 100점 추가
+
+        # 공이 패들을 지나갔을 때 게임 종료
+        if ball_y > HEIGHT:
+            playing = False
+            end_ticks = pygame.time.get_ticks()  # 종료 시간 저장
+
+        # 화면 업데이트
+        screen.fill(BLACK)
+        pygame.draw.rect(screen, WHITE, (paddle_x, paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT))
+        pygame.draw.circle(screen, WHITE, (ball_x, ball_y), BALL_RADIUS)
+
+        # 점수 표시
+        score_text = font.render("Score: " + str(score), True, WHITE)
+        screen.blit(score_text, (10, 10))
+        chances_text = font.render("Chances: " + str(chances), True, WHITE)
+        screen.blit(chances_text, (10, 50))
+
+    if not playing and chances > 0:  # 게임이 진행 중이 아니고 기회가 남아있을 때 시작 문구 표시
+        start_text = font.render("Press SPACE to start", True, WHITE)
+        start_text_rect = start_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40))
+        screen.blit(start_text, start_text_rect)
+
+    if not playing and chances <= 0:  # 모든 게임 기회가 소진되면 게임 종료
+
+        reset_text = font.render("or ENTER to reset", True, WHITE)
+        reset_text_rect = reset_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40))
+        screen.blit(reset_text, reset_text_rect)
+
+        # 게임 종료 후 10초 동안 아무 키도 입력하지 않으면 창을 닫음
+        if end_ticks > 0:
+            elapsed_ticks = pygame.time.get_ticks() - end_ticks  # 종료 후 경과 시간
+            if elapsed_ticks >= 10000:  # 10초 (10000ms) 경과 시
+                pygame.quit()
+                sys.exit()
+
+            pygame.draw.rect(screen, BLACK, (0, HEIGHT // 2 - 30, WIDTH, 60))
+            end_message = font.render("Closing in 10 seconds", True, WHITE)
+            end_message_rect = end_message.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            screen.blit(end_message, end_message_rect)
+
+    pygame.display.flip()
+    clock.tick(60)
