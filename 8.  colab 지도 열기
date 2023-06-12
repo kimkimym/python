@@ -27,9 +27,11 @@ for index, row in df.iterrows():
     lng = row['lot']
     addr = row['road_nm_addr']
     category = row['기관']
+    other_color = 'gray'
     
     popup_text = f'<strong style="font-size: 14px;">{name}</strong><br><span style="font-size: 12px;">주소: {addr}</span>'
     popup = folium.Popup(popup_text, max_width=300)
+
     
     marker_color = colors.get(category, other_color)
     
